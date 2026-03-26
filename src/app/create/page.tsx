@@ -80,10 +80,10 @@ function CreatePageContent() {
   });
 
   const [contentProps, setContentProps] = useState({
-    headline: prefillHeadline || 'Ana Başlık Buraya',
+    headline: prefillHeadline || '',
     subHeadline: '',
-    bodyText: prefillBody || 'Açıklama metni buraya gelecek.',
-    ctaText: prefillCta || 'Hemen Keşfet',
+    bodyText: prefillBody || '',
+    ctaText: prefillCta || '',
     mediaUrls: [] as string[],
   });
 
@@ -130,16 +130,42 @@ function CreatePageContent() {
   async function handleAIExpand() {
     if (!description.trim()) return;
     setAiExpanding(true);
-    // For now, mock the expansion
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/gemini/expand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description,
+          brand: brands.find(b => b.id === selectedBrand) || null,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setContentProps(prev => ({
+          ...prev,
+          headline: data.headline || prev.headline,
+          subHeadline: data.subHeadline || prev.subHeadline,
+          bodyText: data.bodyText || prev.bodyText,
+          ctaText: data.ctaText || prev.ctaText,
+        }));
+      } else {
+        // Fallback: use description directly
+        setContentProps(prev => ({
+          ...prev,
+          headline: description.length > 40 ? description.slice(0, 40) + '...' : description,
+          bodyText: description,
+          ctaText: 'Hemen Keşfet',
+        }));
+      }
+    } catch {
       setContentProps(prev => ({
         ...prev,
-        headline: description.split(' ').slice(0, 5).join(' '),
+        headline: description.length > 40 ? description.slice(0, 40) + '...' : description,
         bodyText: description,
-        ctaText: 'Hemen İncele',
+        ctaText: 'Hemen Keşfet',
       }));
-      setAiExpanding(false);
-    }, 1500);
+    }
+    setAiExpanding(false);
   }
 
   async function handleSave() {
@@ -248,7 +274,7 @@ function CreatePageContent() {
 
           {/* Player */}
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: '0 0 60px rgba(0,0,0,0.5)' }}>
-            {typeof window !== 'undefined' && CompositionComponent && (
+            {CompositionComponent && (
               <Player
                 component={CompositionComponent}
                 compositionWidth={dimensions.width}
@@ -260,6 +286,7 @@ function CreatePageContent() {
                 controls
                 autoPlay
                 loop
+                acknowledgeRemotionLicense
               />
             )}
           </div>

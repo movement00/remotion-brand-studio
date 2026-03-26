@@ -6,10 +6,9 @@ import {
   spring,
   Sequence,
   interpolate,
+  Img,
 } from 'remotion';
-import { AnimatedText } from '../components/AnimatedText';
-import { LogoReveal } from '../components/LogoReveal';
-import { GradientBackground } from '../components/GradientBackground';
+import { loadBrandFonts } from '../utils/fonts';
 
 interface SocialPostProps {
   brand: {
@@ -35,132 +34,315 @@ export const SocialPost: React.FC<SocialPostProps> = ({ brand, content }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const ctaScale = spring({
-    frame: frame - 100,
+  const fonts = loadBrandFonts(
+    brand?.fontHeading || 'Poppins',
+    brand?.fontBody || 'Inter'
+  );
+
+  const primary = brand?.primaryColor || '#3B82F6';
+  const secondary = brand?.secondaryColor || '#1E293B';
+  const accent = brand?.accentColor || '#F59E0B';
+  const headline = content?.headline || '';
+  const bodyText = content?.bodyText || '';
+  const ctaText = content?.ctaText || '';
+  const logoUrl = brand?.logoUrl || '';
+  const brandName = brand?.name || '';
+
+  // Noise grain SVG filter
+  const grainOpacity = 0.04;
+
+  // Background gradient animation
+  const bgAngle = interpolate(frame, [0, 150], [120, 160]);
+
+  // Decorative accent circle
+  const circleScale = spring({
+    frame: frame - 5,
     fps,
-    config: { damping: 8, stiffness: 150 },
+    config: { damping: 20, stiffness: 60 },
+  });
+  const circle2Scale = spring({
+    frame: frame - 15,
+    fps,
+    config: { damping: 25, stiffness: 50 },
+  });
+
+  // Logo glow
+  const logoIn = spring({
+    frame: frame - 8,
+    fps,
+    config: { damping: 12, stiffness: 120 },
+  });
+
+  // Headline words
+  const words = headline.split(' ');
+
+  // CTA
+  const ctaIn = spring({
+    frame: frame - 95,
+    fps,
+    config: { damping: 8, stiffness: 140 },
+  });
+
+  // Bottom line
+  const lineWidth = interpolate(frame, [110, 140], [0, 300], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
+  // Brand name
+  const nameIn = spring({
+    frame: frame - 115,
+    fps,
+    config: { damping: 15, stiffness: 100 },
   });
 
   return (
     <AbsoluteFill>
-      <GradientBackground
-        colors={[brand.primaryColor, brand.secondaryColor, brand.accentColor]}
-        pattern="mesh"
-        animated
-      />
-
-      {/* Grid overlay */}
+      {/* Animated gradient background */}
       <AbsoluteFill
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
+          background: `linear-gradient(${bgAngle}deg, ${primary}, ${secondary} 60%, ${primary}88)`,
         }}
       />
 
-      {/* Logo top-right */}
-      <div style={{ position: 'absolute', top: 40, right: 40 }}>
-        <LogoReveal logoUrl={brand.logoUrl} size={80} startFrame={5} />
-      </div>
+      {/* Noise/grain overlay */}
+      <AbsoluteFill style={{ opacity: grainOpacity, mixBlendMode: 'overlay' }}>
+        <svg width="100%" height="100%">
+          <filter id="grain-social">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.65"
+              numOctaves={3}
+              stitchTiles="stitch"
+            />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#grain-social)" />
+        </svg>
+      </AbsoluteFill>
 
-      {/* Main Content */}
+      {/* Decorative circles */}
+      <div
+        style={{
+          position: 'absolute',
+          top: -100,
+          right: -100,
+          width: 500,
+          height: 500,
+          borderRadius: '50%',
+          border: `2px solid ${accent}22`,
+          transform: `scale(${circleScale})`,
+          opacity: circleScale * 0.5,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: -50,
+          left: -50,
+          width: 300,
+          height: 300,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accent}11 0%, transparent 70%)`,
+          transform: `scale(${circle2Scale})`,
+        }}
+      />
+
+      {/* Subtle grid lines */}
+      <AbsoluteFill
+        style={{
+          backgroundImage: `linear-gradient(${primary}08 1px, transparent 1px), linear-gradient(90deg, ${primary}08 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+          opacity: 0.5,
+        }}
+      />
+
+      {/* Logo with glow */}
+      {logoUrl ? (
+        <div style={{ position: 'absolute', top: 50, right: 50, zIndex: 10 }}>
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 16,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 0 40px ${primary}33`,
+              opacity: logoIn,
+              transform: `scale(${logoIn})`,
+            }}
+          >
+            <Img
+              src={logoUrl}
+              style={{ width: 56, height: 56, objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {/* Main content area */}
       <AbsoluteFill
         style={{
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
           justifyContent: 'center',
-          padding: 80,
+          padding: '80px 70px',
         }}
       >
-        {/* Headline */}
-        <Sequence from={20}>
-          <AnimatedText
-            text={content.headline}
-            mode="words"
-            charDelay={4}
+        {/* Accent line above headline */}
+        <Sequence from={10}>
+          <div
             style={{
-              fontFamily: brand.fontHeading,
-              fontSize: 72,
-              fontWeight: 800,
-              color: '#FFFFFF',
-              textAlign: 'center',
-              lineHeight: 1.1,
-              textShadow: '0 4px 30px rgba(0,0,0,0.3)',
+              width: interpolate(
+                spring({
+                  frame: frame - 10,
+                  fps,
+                  config: { damping: 15, stiffness: 120 },
+                }),
+                [0, 1],
+                [0, 60]
+              ),
+              height: 4,
+              backgroundColor: accent,
+              borderRadius: 2,
+              marginBottom: 30,
             }}
           />
         </Sequence>
 
-        {/* Body text */}
-        <Sequence from={60}>
-          <AnimatedText
-            text={content.bodyText || ''}
-            mode="line"
-            startFrame={0}
-            style={{
-              fontFamily: brand.fontBody,
-              fontSize: 32,
-              color: 'rgba(255,255,255,0.85)',
-              textAlign: 'center',
-              marginTop: 30,
-              maxWidth: 800,
-              lineHeight: 1.4,
-            }}
-          />
-        </Sequence>
-
-        {/* CTA Button */}
-        {content.ctaText && (
-          <Sequence from={90}>
-            <div
-              style={{
-                marginTop: 50,
-                padding: '18px 50px',
-                backgroundColor: brand.accentColor,
-                borderRadius: 50,
-                opacity: ctaScale,
-                transform: `scale(${ctaScale})`,
-              }}
-            >
+        {/* Headline -- word by word */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 16px' }}>
+          {words.map((word, i) => {
+            const wordIn = spring({
+              frame: frame - 20 - i * 6,
+              fps,
+              config: { damping: 11, stiffness: 160 },
+            });
+            const rotation = (1 - wordIn) * (i % 2 === 0 ? -3 : 3);
+            return (
               <span
+                key={i}
                 style={{
-                  fontFamily: brand.fontBody,
-                  fontSize: 28,
-                  fontWeight: 700,
+                  fontFamily: fonts.heading,
+                  fontSize: 68,
+                  fontWeight: 800,
                   color: '#FFFFFF',
-                  letterSpacing: 1,
+                  lineHeight: 1.15,
+                  opacity: wordIn,
+                  transform: `translateY(${(1 - wordIn) * 25}px) rotate(${rotation}deg)`,
+                  display: 'inline-block',
+                  textShadow: '0 2px 20px rgba(0,0,0,0.3)',
                 }}
               >
-                {content.ctaText}
+                {word}
               </span>
+            );
+          })}
+        </div>
+
+        {/* Body text */}
+        {bodyText ? (
+          <Sequence from={55}>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 28,
+                color: 'rgba(255,255,255,0.75)',
+                lineHeight: 1.5,
+                marginTop: 24,
+                maxWidth: 800,
+                opacity: spring({
+                  frame: frame - 55,
+                  fps,
+                  config: { damping: 15, stiffness: 80 },
+                }),
+                letterSpacing: interpolate(
+                  spring({
+                    frame: frame - 55,
+                    fps,
+                    config: { damping: 15, stiffness: 80 },
+                  }),
+                  [0, 1],
+                  [4, 0]
+                ),
+              }}
+            >
+              {bodyText}
+            </p>
+          </Sequence>
+        ) : null}
+
+        {/* CTA Button */}
+        {ctaText ? (
+          <Sequence from={85}>
+            <div style={{ marginTop: 40 }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '16px 44px',
+                  borderRadius: 50,
+                  background: accent,
+                  boxShadow: `0 8px 32px ${accent}44, 0 0 0 1px ${accent}`,
+                  opacity: ctaIn,
+                  transform: `scale(${ctaIn}) translateY(${(1 - ctaIn) * 15}px)`,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 24,
+                    fontWeight: 700,
+                    color: primary,
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {ctaText}
+                </span>
+              </div>
             </div>
           </Sequence>
-        )}
+        ) : null}
       </AbsoluteFill>
 
-      {/* Brand name bottom */}
-      <Sequence from={110}>
+      {/* Bottom bar */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 50,
+          left: 70,
+          right: 70,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+        }}
+      >
+        {/* Separator line */}
         <div
           style={{
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-            textAlign: 'center',
+            width: lineWidth,
+            height: 1,
+            backgroundColor: 'rgba(255,255,255,0.2)',
+          }}
+        />
+        {/* Brand name */}
+        <span
+          style={{
+            fontFamily: fonts.body,
+            fontSize: 16,
+            color: 'rgba(255,255,255,0.4)',
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            opacity: nameIn,
+            whiteSpace: 'nowrap',
           }}
         >
-          <AnimatedText
-            text={brand.slogan || brand.name}
-            mode="line"
-            style={{
-              fontFamily: brand.fontBody,
-              fontSize: 20,
-              color: 'rgba(255,255,255,0.5)',
-              letterSpacing: 3,
-              textTransform: 'uppercase',
-            }}
-          />
-        </div>
-      </Sequence>
+          {brand?.slogan || brandName}
+        </span>
+      </div>
     </AbsoluteFill>
   );
 };

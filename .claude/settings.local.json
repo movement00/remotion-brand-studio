@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:www.remotion.dev)",
+      "Bash(grep -l \"loadBrandFonts\" \"C:/Users/ASUS/Desktop/remotiondev/src/remotion/compositions/\"*.tsx)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
