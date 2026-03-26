@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@netlify/plugin-nextjs": "^5.15.9",
     "@remotion/cli": "^4.0.441",
     "@remotion/google-fonts": "^4.0.441",
     "@remotion/player": "^4.0.441",

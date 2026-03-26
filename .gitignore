@@ -47,3 +47,6 @@ next-env.d.ts
 # remotion output
 out/
 
+
+# Local Netlify folder
+.netlify
