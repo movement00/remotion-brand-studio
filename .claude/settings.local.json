@@ -4,7 +4,13 @@
       "mcp__Claude_Preview__preview_start",
       "WebFetch(domain:www.remotion.dev)",
       "Bash(grep -l \"loadBrandFonts\" \"C:/Users/ASUS/Desktop/remotiondev/src/remotion/compositions/\"*.tsx)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npx netlify-cli:*)",
+      "Bash(npm ls:*)",
+      "Bash(1)",
+      "mcp__f227d1c4-1b58-49d8-a9c0-b591fb90016e__deploy_to_vercel",
+      "Bash(npm install:*)",
+      "Bash(vercel --prod --yes)"
     ]
   }
 }
