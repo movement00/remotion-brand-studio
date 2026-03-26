@@ -1,0 +1,47 @@
+export const APP_NAME = 'Remotion Brand Studio';
+export const APP_DESCRIPTION = 'AI destekli marka video üretim platformu';
+
+export const SECTORS = [
+  'Teknoloji',
+  'E-ticaret',
+  'Sağlık',
+  'Eğitim',
+  'Finans',
+  'Gıda & İçecek',
+  'Moda & Tekstil',
+  'Otomotiv',
+  'Gayrimenkul',
+  'Turizm & Otelcilik',
+  'Medya & Eğlence',
+  'Spor & Fitness',
+  'Kozmetik & Güzellik',
+  'Mobilya & Dekorasyon',
+  'Tarım',
+  'Lojistik',
+  'Hukuk',
+  'Danışmanlık',
+  'Diğer',
+] as const;
+
+export const GOOGLE_FONTS = [
+  'Poppins',
+  'Inter',
+  'Roboto',
+  'Open Sans',
+  'Montserrat',
+  'Raleway',
+  'Playfair Display',
+  'Oswald',
+  'Lato',
+  'Nunito',
+  'Merriweather',
+  'Source Sans Pro',
+  'Ubuntu',
+  'Rubik',
+  'Work Sans',
+  'Quicksand',
+  'Barlow',
+  'Mulish',
+  'Fira Sans',
+  'Josefin Sans',
+] as const;
